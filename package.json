@@ -5,10 +5,7 @@
   "main": "index.html",
   "dependencies": {
     "jquery": "^3.3.1",
-    "video.js": "^4.6.4",
-    "videojs-contrib-dash": "^2.9.2",
-    "videojs-contrib-hls": "^4.1.1",
-    "videojs-hls.js": "0.0.1"
+    "video.js": "4.6.4"
   },
   "devDependencies": {
     "gulp": "^3.9.1"
