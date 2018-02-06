@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">  
+  <meta charset="utf-8">
+ <link href="node_modules/video.js/dist/cdn/video-js.css" rel="stylesheet">
+
+  <!-- If you'd like to support IE8 -->
+  <script src="node_modules/jquery/dist/jquery.min.js"></script>	
+  <!--script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajaxtransport-xdomainrequest/1.0.3/jquery.xdomainrequest.min.js"></script>	
+  <script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script-->
+  <script src="https://analytics.ooyala.com/static/analytics.js"></script>
+  <script src="node_modules/video.js/dist/cdn/video.js"></script>
+<!--script src="node_modules/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
+<script src="node_modules/dashjs/dist/dash.all.min.js"></script-->
+
+
+  <script>
+	// Create Base64 Object
+	var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9+/=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/rn/g,"n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
+
+	var queryParams = window.location.href;
+	var pbid = 'aa4c97a1795640648a033c3f89858fce';
+	var ec = queryParams.match(/ec=([^&]*)/)[1];
+	//var ec = 'FlbjBsYjE66C2XRiXanZ8dBA3LBJhtio';
+	var pcode = 'UzM2oyOhgtCq_z4DZDUqQadISueB';
+
+    //videojs.options.flash.swf = "node_modules/video.js/dist/cdn/video-js.swf";
+    videojs.options.flash.swf = "http://www.flashls.org/videojs/video-js.swf";
+//$( window ).on( "load", function(){
+$(document).ready(function(){
+		createVideoElm("div1",pcode,ec);
+        
+
+});
+function loadStream(url,type) {
+    console.log("Loading stream with "+url);
+    var $vid_obj = _V_("video1");
+    $vid_obj.src(url);
+    $vid_obj.on('loadstart',function(){
+        $vid_obj.play();
+    });
+}
+	var createVideoElm = function(parentElm,pcode,embedCode){
+	
+		var urlString="https://player.ooyala.com/sas/player_api/v2/authorization/embed_code/"+pcode+"/"+embedCode+"?device=html5&domain=joins.com"
+        //$.ajax({url: urlString, jonsp="construct",type;});
+        $.ajax({
+            url: urlString,
+
+            // The name of the callback parameter, as specified by the YQL service
+            jsonp: "jsonp",
+
+            // Tell jQuery we're expecting JSONP
+            dataType: "jsonp",
+
+            // Work with the response
+            success: function( response ) {
+			var result=jQuery.parseJSON(response);
+        console.log("Creating video element");
+		var mp4Url=getStreamUrl(result,'mp4',1280);
+		var rtmpUrl=getStreamUrl(result,'rtmp',1280);
+		var hlsUrl=getStreamUrl(result,'hls');
+		var dashUrl=getStreamUrl(result,'dash');
+
+		//create video element and append it to the parent div
+			var video = $('<video />', {
+				id: 'video',
+                'class':'video-js',
+				type: 'mp4',
+                'data-embedId':embedCode,
+				controls: true,
+                'poster':'https://static1.squarespace.com/static/51c46ad4e4b023fb4b7b00ef/58b3a55ed482e9ff053ef9c6/58b3b10a893fc0dc7cc1f804/1488175124510/ooyala-ovp.jpg?format=1500w'
+			});
+            if(mp4Url){
+            var mp4Source = $('<source/>',{ 
+                src:mp4Url,
+                type:'video/mp4'
+            });
+            video.append(mp4Source);
+            loadStream(mp4Url,"html5");
+            }
+            if(rtmpUrl){
+            var rtmpSource = $('<source/>',{ 
+                src:rtmpUrl,
+                type:'rtmp/mp4'
+            });
+            video.append(rtmpSource);
+            }
+            if(hlsUrl){
+                var hlsSource = $('<source/>',{ 
+                src:hlsUrl,
+                type:'application/x-mpegURL'
+            });
+            video.append(hlsSource);
+            loadStream(hlsUrl,"flash");
+            }
+            /*if(dashUrl){
+                var dashSource = $('<source/>',{ 
+                src:dashUrl,
+                type:'application/dash+xml'
+            });
+            video.append(dashSource);
+            }*/
+
+		//$("#"+parentElm).append(video);
+		console.log($("#"+parentElm));	
+                //var player = _V_(video[0]);
+                if(hlsUrl){
+                console.log(hlsUrl);
+                    var player=_V_(video[0], {techOrder: ['flash']});
+                    player.src=hlsUrl; 
+                }else{
+                
+                console.log("HI");
+                    var player=_V_(video[0], {techOrder: ['html5','flash']});
+                    player.src=mp4Url; 
+                }
+        player.on('loadstart',function(){
+        player.play();
+        });
+        //player.options.autoplay = true;
+        //Ooyala.Analytics.HTML5Reporter(pcode, video[0]);
+
+		}
+		//var videoContainer = document.getElementById("div1").getElementsByTagName('video');
+	
+        });
+        
+	    }
+
+
+
+	getStreamUrl = function (result,format,width) {
+	
+		clearUrl="";
+		$.each(result.authorization_data[ec].streams, function( index, value ) {
+			if(value.delivery_type===format){
+                if(width){
+                    if(value.width != width){
+                        return;
+                    }
+                }
+				console.log(value.url.data);
+				clearUrl =Base64.decode(value.url.data);
+				return false;
+			}
+		});
+	
+		return clearUrl;
+	}
+	
+
+  </script>
+</head>
+<body>
+
+    OOYALA Player 
+
+<div id="div1">
+<video id="video1" class="video-js vjs-default-skin" controls preload="none" width="640" height="264" 
+    poster="https://vjs.zencdn.net/v/oceans.png"
+    data-setup='{"techOrder": ["flash"]}>'
+  </video>
+
+</div>
+
+
+</body>
+</html>
+      <!--data-setup='{"techOrder": ["html5","flash"]}'-->

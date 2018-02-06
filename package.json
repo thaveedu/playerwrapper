@@ -1,0 +1,29 @@
+{
+  "name": "playersamples",
+  "version": "1.0.0",
+  "description": "Player Samples",
+  "main": "index.html",
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "video.js": "^4.6.4",
+    "videojs-contrib-dash": "^2.9.2",
+    "videojs-contrib-hls": "^4.1.1",
+    "videojs-hls.js": "0.0.1"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/traja-ooyala/playersamples.git"
+  },
+  "author": "Thaveedu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/traja-ooyala/playersamples/issues"
+  },
+  "homepage": "https://github.com/traja-ooyala/playersamples#readme"
+}
