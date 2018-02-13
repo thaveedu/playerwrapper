@@ -8,14 +8,22 @@
   <!-- If you'd like to support IE8 -->
   <script src="node_modules/jquery/dist/jquery.min.js"></script>
   <!--script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajaxtransport-xdomainrequest/1.0.3/jquery.xdomainrequest.min.js"></script>
-  <script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script-->
+  <script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
   <script src="https://analytics.ooyala.com/static/analytics.js"></script>
+  <script src="https://analytics.ooyala.com/static/v3/analytics.js"></script-->
+  <script src="/analytics.js"></script>
   <script src="node_modules/video.js/dist/video-js/video.js"></script>
   <!--script src="node_modules/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
   <script src="node_modules/dashjs/dist/dash.all.min.js"></script-->
 
 
   <script>
+function S4() {
+    return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+}
+
+// then to call it, plus stitch in '4' in the third group
+guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
   // Create Base64 Object
   var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9+/=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/rn/g,"n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
 
@@ -24,22 +32,48 @@
   var ec = queryParams.match(/ec=([^&]*)/)[1];
   //var ec = 'FlbjBsYjE66C2XRiXanZ8dBA3LBJhtio';
   var pcode = 'UzM2oyOhgtCq_z4DZDUqQadISueB';
-  //videojs.options.flash.swf = "http://www.flashls.org/videojs/video-js.swf";
   videojs.options.flash.swf = "node_modules/video.js/dist/cdn/video-js.swf";
   //$( window ).on( "load", function(){
+    var ooyalaReporter = new Ooyala.Analytics.Reporter(pcode,guid);
+    /*setDeviceInfo('dvid_ff14d8e1',{browser: 'IE', browserVersion: '9', os: 'windows', osVersion: '7', deviceType: 'desktop'});
+    setPlayerInfo('plid_b149aae0', 'Custom Player', '4.4.8');
+    */
 
   $(document).ready(function(){
 
     createVideoElm("div1",pcode,ec);
-
 
   });
   function loadStream(url) {
     console.log("Loading stream with "+url);
     var $vid_obj = _V_("video1");
     $vid_obj.src(url);
+    
+    /*ooyalaReporter.initializeMedia('5612443', Ooyala.Analytics.MediaContentType.OOYALA_CONTENT);
+    var d = Math.floor($vid_obj.duration);
+    ooyalaReporter.setMediaDuration(d);
+    ooyalaReporter.reportPlayRequested();
+    ooyalaReporter.reportPlayHeadUpdate(2000);
+    ooyalaReporter.reportPlayHeadUpdate(4000);
+    ooyalaReporter.reportPlayHeadUpdate(60000);
+    */
+
+    
     $vid_obj.on('loadstart',function(){
+      console.log("Video playback has started");
+      ooyalaReporter.reportPlayerLoad();
       $vid_obj.play();
+    });
+    $vid_obj.on('ended',function(){
+      console.log("Video playback has been ended");
+      ooyalaReporter.reportComplete();
+    });
+    $vid_obj.on('pause',function(){
+      console.log("Video playback has been paused");
+    });
+    $vid_obj.on('play',function(){
+      console.log("Video playback has been started after pause");
+      ooyalaReporter.reportPlaybackStarted();
     });
   }
   var createVideoElm = function(parentElm,pcode,embedCode){
@@ -104,8 +138,13 @@
     }*/
 
     //$("#"+parentElm).append(video);
-    console.log($("#"+parentElm));
+    //console.log($("#"+parentElm));
     //var player = _V_(video[0]);
+    var videoContainer = document.getElementById("video1");
+        //videoContainer.setAttribute("data-embedId", embedcode);
+       // Ooyala.Analytics.HTML5Reporter(pcode, videoContainer);
+
+
     if(hlsUrl){
       console.log(hlsUrl);
       loadStream(hlsUrl);
