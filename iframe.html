@@ -58,6 +58,10 @@ guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + 
     ooyalaReporter.reportPlayHeadUpdate(60000);
     */
 
+    $vid_obj.on('playing',function(){
+      console.log("Video playback is in progress");
+      //ooyalaReporter.reportPlayHeadUpdate(2000);
+    });
     
     $vid_obj.on('loadstart',function(){
       console.log("Video playback has started");
@@ -83,7 +87,6 @@ guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + 
     $.ajax({
       url: urlString,
 
-      // The name of the callback parameter, as specified by the YQL service
       jsonp: "jsonp",
 
       // Tell jQuery we're expecting JSONP
@@ -191,7 +194,7 @@ getStreamUrl = function (result,format,width) {
   OOYALA Player
 
   <div id="div1">
-    <video id="video1" class="video-js vjs-default-skin" controls preload="true" width="640" height="264"
+    <video id="video1" class="video-js vjs-default-skin" controls preload="true" width="640" height="640"
     poster="/oceans.png"
     data-setup='{"techOrder": ["flash"]}'>
   </video>
