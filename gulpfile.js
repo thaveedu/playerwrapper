@@ -21,6 +21,8 @@ gulp.task('default', function() {
     gulp.src(['node_modules/video.js/dist/video-js/font/**'])
     .pipe(gulp.dest(DEST+"/f/3"));
     
+    gulp.src(['node_modules/video.js/dist/cdn/video-js.swf','oceans.png'])
+    .pipe(gulp.dest(DEST));
     
     gulp.src(['node_modules/video.js/dist/cdn/video-js.css'])
     // This will output the non-minified version

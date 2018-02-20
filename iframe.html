@@ -37,41 +37,67 @@ guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + 
   var ec = queryParams.match(/ec=([^&]*)/)[1];
   //var ec = 'FlbjBsYjE66C2XRiXanZ8dBA3LBJhtio';
   var pcode = 'UzM2oyOhgtCq_z4DZDUqQadISueB';
-  videojs.options.flash.swf = "node_modules/video.js/dist/cdn/video-js.swf";
-  //$( window ).on( "load", function(){
     var ooyalaReporter = new Ooyala.Analytics.Reporter(pcode,guid);
-    /*setDeviceInfo('dvid_ff14d8e1',{browser: 'IE', browserVersion: '9', os: 'windows', osVersion: '7', deviceType: 'desktop'});
-    setPlayerInfo('plid_b149aae0', 'Custom Player', '4.4.8');
-    */
-
-  $(document).ready(function(){
+    ooyalaReporter.setDeviceInfo('dvid_ff14d8e1',{browser: 'IE', browserVersion: '9', os: 'windows', osVersion: '7', deviceType: 'desktop'});
+    ooyalaReporter.setPlayerInfo('plid_b149aae0', 'Custom Player', '4.4.8');
+  
+$(document).ready(function(){
+    videojs.options.flash.swf = "node_modules/video.js/dist/cdn/video-js.swf";
+    //$( window ).on( "load", function(){
 
     createVideoElm("div1",pcode,ec);
 
   });
-  function loadStream(url) {
+  function loadStream(url,isAutoPlay=false) {
     console.log("Loading stream with "+url);
     var $vid_obj = _V_("video1");
     $vid_obj.src(url);
     
-    /*ooyalaReporter.initializeMedia('5612443', Ooyala.Analytics.MediaContentType.OOYALA_CONTENT);
-    var d = Math.floor($vid_obj.duration);
-    ooyalaReporter.setMediaDuration(d);
-    ooyalaReporter.reportPlayRequested();
+    var previousTime = 0;
+    var currentTime = 0;
+    var totalTime = Math.floor($vid_obj.duration*1000); //converting seconds to millis
+    console.log("Video playback is in progress "+totalTime);
+
+    ooyalaReporter.initializeMedia('5612443', Ooyala.Analytics.MediaContentType.OOYALA_CONTENT);
+   // var d = Math.floor($vid_obj.duration);
+    ooyalaReporter.setMediaDuration(totalTime);
+    /*ooyalaReporter.reportPlayRequested();
     ooyalaReporter.reportPlayHeadUpdate(2000);
     ooyalaReporter.reportPlayHeadUpdate(4000);
     ooyalaReporter.reportPlayHeadUpdate(60000);
     */
+        if(isAutoPlay){
+            $vid_obj.play();
+        }
 
     $vid_obj.on('playing',function(){
-      console.log("Video playback is in progress");
-      //ooyalaReporter.reportPlayHeadUpdate(2000);
+      ooyalaReporter.reportPlayRequested(isAutoPlay);
+        console.log("Video playback started");
+     });
+    $vid_obj.on('progress',function(){
+      var playHeadPositionMillis=currentTime;
+      console.log("Video playback is in progress "+playHeadPositionMillis);
+      ooyalaReporter.reportPlayHeadUpdate(playHeadPositionMillis);
     });
-    
     $vid_obj.on('loadstart',function(){
-      console.log("Video playback has started");
+      console.log("Video element is loaded and ready");
       ooyalaReporter.reportPlayerLoad();
-      $vid_obj.play();
+    });
+    $vid_obj.on('seeking', function() {
+    console.log('seeking from', previousTime, 'to', currentTime, '; delta:', currentTime - previousTime);
+    });
+    $vid_obj.on('seeked', function() {
+    console.log('seeked from', previousTime, 'to', currentTime, '; delta:', currentTime - previousTime);
+    });
+
+    $vid_obj.on('timeupdate', function() {
+    previousTime = currentTime;
+    currentTime = $vid_obj.currentTime()*1000; //converting seconds to millis
+    console.log("Video time update from "+previousTime+ "to "+currentTime);
+    }); 
+    $vid_obj.on('loadeddata',function(){
+      console.log("Video content loaded");
+      ooyalaReporter.reportPlaybackStarted();
     });
     $vid_obj.on('ended',function(){
       console.log("Video playback has been ended");
@@ -79,10 +105,11 @@ guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + 
     });
     $vid_obj.on('pause',function(){
       console.log("Video playback has been paused");
+      ooyalaReporter.reportPause();
     });
     $vid_obj.on('play',function(){
-      console.log("Video playback has been started after pause");
-      ooyalaReporter.reportPlaybackStarted();
+      console.log("Video playback resumed");
+      ooyalaReporter.reportResume();
     });
   }
   var createVideoElm = function(parentElm,pcode,embedCode){
@@ -152,15 +179,16 @@ guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + 
         //videoContainer.setAttribute("data-embedId", embedcode);
        // Ooyala.Analytics.HTML5Reporter(pcode, videoContainer);
 
+      var isAutoPlay=true;
 
     if(hlsUrl){
       console.log(hlsUrl);
-      loadStream(hlsUrl);
+      loadStream(hlsUrl,isAutoPlay);
 
     }else{
 
       console.log("MP4 Stream");
-      loadStream(mp4Url);
+      loadStream(mp4Url,isAutoPlay);
 
     }
 
@@ -199,7 +227,7 @@ getStreamUrl = function (result,format,width) {
   OOYALA Player
 
   <div id="div1">
-    <video id="video1" class="video-js vjs-default-skin" controls preload="true" width="640" height="640"
+    <video id="video1" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="true" width="640" height="640"
     poster="/oceans.png"
     data-setup='{"techOrder": ["flash"]}'>
   </video>
